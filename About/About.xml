@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ModMetaData>
+	<name>Trade Ships No Matter What</name>
+	<author>Windows XP</author>
+	<url>https://www.youtube.com/watch?v=dQw4w9WgXcQ</url>
+   <supportedVersions>
+	  <li>1.3</li>
+	  <li>1.2</li>
+   </supportedVersions>
+	<modDependencies>
+		<li>
+			<packageId>brrainz.harmony</packageId>
+			<displayName>Harmony</displayName>
+			<steamWorkshopUrl>steam://url/CommunityFilePage/2009463077</steamWorkshopUrl>
+			<downloadUrl>https://github.com/pardeike/HarmonyRimWorld/releases/latest</downloadUrl>
+		</li>
+	</modDependencies>
+	<loadAfter>
+		<li>brrainz.harmony</li>
+    </loadAfter>
+	<description>&lt;b&gt;Doesn't break saves!&lt;/b&gt;
+Tired of trade ships not showing up? Think it's stupid that you've only got 2 orbital traders in the 6 years of your colony's existence? Do you have mods that are breaking traders? Is the More Trade Ships mod not working for some reason? Is Randy being a bitch? Shocked how traders show up orders of magnitude less often in 1.2 than in 1.0? Well that's why I made the Trade Ships No Matter What mod. This mod does just what the name says. It triggers an orbital trader event every x days completely disregarding any and all other game code having to do with storyteller interaction, what's going on, mods that mess with traders or anything else. If you set this mod to spawn a trader every 3-5 days and put it at the bottom the your mods list, it will make a trade ship show up every 3-5 days no matter what.
+
+It also fixes a "feature" where sometimes when you start a new game, zero orbital traders with uranium are spawned. When this happens you will never see uranium being carried by bulk goods traders unless you start a new save (and hope you dont get another zero uranium trader reshuffle).
+</description>
+<packageId>WindowsXP.TradeShipsNoMatterWhat</packageId>
+</ModMetaData>
