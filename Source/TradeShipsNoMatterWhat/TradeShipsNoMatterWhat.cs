@@ -10,7 +10,6 @@ using HarmonyLib;
 
 namespace TradeShipsNoMatterWhat
 {
-
     [StaticConstructorOnStartup]
     public static class MainLoader
     {
@@ -20,6 +19,7 @@ namespace TradeShipsNoMatterWhat
         public static int staticMin = 0;
         public static bool staticUraniumTraders;
         public static Map thisMap;
+        public static bool init = false;
 
         //public static System.Random rNum = new System.Random();
         //public static int ticksTillNextShip = rNum.Next(staticMin * 60000, staticMax * 60000);
@@ -61,6 +61,58 @@ namespace TradeShipsNoMatterWhat
 
         }
 
+    }
+
+    //repurposing the drugEntry data type from my Animals Can Do Drugs mod
+    public class traderEntry : IExposable
+    {
+        public string defName = "error";
+        public bool enabled = false;
+
+        public traderEntry()
+        {
+            defName = "error";
+            enabled = false;
+        }
+
+        public traderEntry(string theDefName)
+        {
+            defName = theDefName;
+            enabled = true;
+        }
+
+        public traderEntry(string theDefName, bool theValue)
+        {
+            defName = theDefName;
+            enabled = theValue;
+        }
+
+        public void ExposeData()
+        {
+            Scribe_Values.Look(ref defName, "traderName");
+            Scribe_Values.Look(ref enabled, "enabled", false, true);
+        }
+
+        public int CompareTo(traderEntry compTrader)
+        {
+            //it sorts in alphabetical order of the defname and not the label name
+            if (compTrader == null) return 1;
+            //ignore the culture-aware warning since these are def names we are dealing with
+            return this.defName.CompareTo(compTrader.defName);
+        }
+    }
+
+    //to allow sorting in alphabetical order
+    public class traderCompare : IComparer<traderEntry>
+    {
+        public int Compare(traderEntry trader1, traderEntry trader2)
+        {
+            if (trader1.defName == null || trader2.defName == null)
+            {
+                return 0;
+            }
+            return trader1.CompareTo(trader2);
+        }
     }
 
     [HarmonyPatch(typeof(ScribeSaver))]
@@ -133,6 +185,8 @@ namespace TradeShipsNoMatterWhat
                     Log.Message("There will be " + MainLoader.ticksTillNextShip + " ticks until the next ship shows up");
                 }
                 Log.Message("ticksTillNextShip = " + MainLoader.ticksTillNextShip);
+
+
             }
             catch (Exception e)
             {
@@ -161,7 +215,18 @@ namespace TradeShipsNoMatterWhat
                 Map thisMap = Find.RandomPlayerHomeMap;
                 if (thisMap != null)
                 {
+                    List<TraderKindDef> listOfValidTraders = new List<TraderKindDef>();
+                    foreach (traderEntry trader in TradeShipsNoMatterWhatSettings.intermediateList)
+                    {
+                        if (trader.enabled)
+                        {
+                            listOfValidTraders.Add(DefDatabase<TraderKindDef>.GetNamed(trader.defName));
+                        }
+                    }
                     paramss.target = thisMap;
+                    System.Random rnd = new System.Random();
+                    paramss.traderKind = listOfValidTraders[rnd.Next(0,listOfValidTraders.Count)];
+                    Log.Message("randomly selected trader kind = " + paramss.traderKind.defName);
                     MainLoader.thisMap = thisMap;
                     IncidentDefOf.OrbitalTraderArrival.Worker.TryExecute(paramss);
                 }
@@ -184,6 +249,9 @@ namespace TradeShipsNoMatterWhat
     {
         public string name = "TSNMW";
         public int loadID = 0;
+        public static bool init = false;
+        public static List<traderEntry> intermediateList = new List<traderEntry>();
+        public List<traderEntry> nonStaticTraderList = new List<traderEntry>();
         /// <summary>
         /// The three settings our mod has.
         /// </summary>
@@ -201,9 +269,9 @@ namespace TradeShipsNoMatterWhat
         /// </summary>
         public override void ExposeData()
         {
-            //there's no way to get this option to work (I would love to be proven wrong) so I'm disabling it.
-            //Scribe_Values.Look(ref forceUraniumTraders, "forceUraniumTraders");
-
+            nonStaticTraderList = intermediateList;
+            Scribe_Collections.Look(ref nonStaticTraderList, "activatedTraders", LookMode.Deep);
+            intermediateList = nonStaticTraderList;
 
             Scribe_Values.Look(ref minDays, "minDays", 3);
             Scribe_Values.Look(ref maxDays, "maxDays", 7);
@@ -228,6 +296,7 @@ namespace TradeShipsNoMatterWhat
         /// </summary>
         public TradeShipsNoMatterWhatSettings settings;
 
+        public static Vector2 scrollPosition;
         /// <summary>
         /// A mandatory constructor which resolves the reference to our settings.
         /// </summary>
@@ -245,8 +314,7 @@ namespace TradeShipsNoMatterWhat
         {
             Listing_Standard listingStandard = new Listing_Standard();
             listingStandard.Begin(inRect);
-            //disable uranium traders feature since it doesn't work
-            //listingStandard.CheckboxLabeled("force uranium traders", ref settings.forceUraniumTraders, "forces there to be 1 or more bulk goods trader that carries uranium. Some times, the game spawns bulk goods traders with uranium upon creation of a new game and sometimes it doesn't. I think that's bullshit.");
+
             listingStandard.Label("Minimum days between orbital trader arrivals: " + settings.minDays);
             settings.minDays = Convert.ToInt32(Math.Floor(listingStandard.Slider(settings.minDays, 0, 119)));
             if (settings.maxDays <= settings.minDays) settings.maxDays = settings.minDays + 1;
@@ -254,6 +322,51 @@ namespace TradeShipsNoMatterWhat
             settings.maxDays = Convert.ToInt32(Math.Floor(listingStandard.Slider(settings.maxDays, 1, 120)));
             if (settings.minDays >= settings.maxDays) settings.minDays = settings.maxDays - 1;
             listingStandard.CheckboxLabeled("disable save file xml entry", ref settings.saveFileFunctionality, "Trade Ships No Matter What saves an xml node to your save file to avoid regenerating the trade ship arrival time each time you load the game. This is the only thing could could possibly break compatibility in future rimworld versions/other similar mods/etc. If you are having problems, turn this option off. It must be noted that you do not have to start a new save for the changes to take effect regardless of what this is set to.");
+
+            Rect viewRect = new Rect(0f, 0f, inRect.width - 26f, inRect.height);
+            Rect outRect = new Rect(0f, 30f, inRect.width, inRect.height + 30f);
+            Widgets.BeginScrollView(outRect, ref scrollPosition, viewRect);
+
+            //if trader list has not yet been initialized
+            //messy, but can allow for modification of trader frequency in the future
+            if (!TradeShipsNoMatterWhatSettings.init)
+            {
+                //first, see if anything has been loaded
+                List<string> previouslyDisabledTraders = new List<string>();
+                foreach (traderEntry trader in TradeShipsNoMatterWhatSettings.intermediateList)
+                {
+                    if (!trader.enabled) previouslyDisabledTraders.Add(trader.defName);
+                }
+                TradeShipsNoMatterWhatSettings.intermediateList = new List<traderEntry>();
+
+                //load the list while preserving any original settings
+                foreach (TraderKindDef traderDef in DefDatabase<TraderKindDef>.AllDefsListForReading)
+                {
+                    if (traderDef.orbital)
+                    {
+                        bool status = true;
+                        if (previouslyDisabledTraders.Contains(traderDef.defName))
+                        {
+                            status = false;
+                        }
+                        TradeShipsNoMatterWhatSettings.intermediateList.Add(new traderEntry(traderDef.defName, status));
+
+                    }
+                }
+                TradeShipsNoMatterWhatSettings.init = true;
+                Log.Message("[TradeShipsNoMatterWhat]Initialized loaded traders");
+            }
+
+            //display the list of stuff
+            foreach (traderEntry trader in TradeShipsNoMatterWhatSettings.intermediateList)
+            {
+                listingStandard.CheckboxLabeled(trader.defName, ref trader.enabled, "trader");
+            }
+
+            listingStandard.Label("If you are reading this, all the stuff got loaded correctly");
+
+            Widgets.EndScrollView();
+
             listingStandard.End();
             base.DoSettingsWindowContents(inRect);
         }

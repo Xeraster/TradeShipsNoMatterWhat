@@ -5,3 +5,4 @@
 /home/scott/.local/share/Steam/steamapps/common/RimWorld/Mods/TradeShipsNoMatterWhat/Source/TradeShipsNoMatterWhat/obj/Release/TradeShipsNoMatterWhat.csprojAssemblyReference.cache
 /home/scott/.local/share/Steam/steamapps/common/RimWorld/Mods/TradeShipsNoMatterWhat/Source/TradeShipsNoMatterWhat/obj/Release/TradeShipsNoMatterWhat.dll
 /home/scott/.local/share/Steam/steamapps/common/RimWorld/Mods/TradeShipsNoMatterWhat/Assemblies/TradeShipsNoMatterWhat.dll
+/home/scott/.local/share/Steam/steamapps/common/RimWorld/Mods/TradeShipsNoMatterWhat/Source/TradeShipsNoMatterWhat/obj/Release/TradeShipsNoMatterWhat.csproj.CoreCompileInputs.cache
