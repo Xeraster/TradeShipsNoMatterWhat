@@ -216,20 +216,23 @@ namespace TradeShipsNoMatterWhat
                 if (thisMap != null)
                 {
                     List<TraderKindDef> listOfValidTraders = new List<TraderKindDef>();
-                    foreach (traderEntry trader in TradeShipsNoMatterWhatSettings.intermediateList)
+                    if (TradeShipsNoMatterWhatSettings.intermediateList != null)
                     {
-                        if (trader.enabled)
+                        foreach (traderEntry trader in TradeShipsNoMatterWhatSettings.intermediateList)
                         {
-                            listOfValidTraders.Add(DefDatabase<TraderKindDef>.GetNamed(trader.defName));
+                            if (trader.enabled)
+                            {
+                                listOfValidTraders.Add(DefDatabase<TraderKindDef>.GetNamed(trader.defName));
+                            }
                         }
                     }
                     paramss.target = thisMap;
                     System.Random rnd = new System.Random();
-                    if (listOfValidTraders.Count > 0)
+                    if (listOfValidTraders != null && listOfValidTraders.Count != 0)
                     {
                         paramss.traderKind = listOfValidTraders[rnd.Next(0, listOfValidTraders.Count)];
+                        Log.Message("randomly selected trader kind = " + paramss.traderKind.defName);
                     }
-                    Log.Message("randomly selected trader kind = " + paramss.traderKind.defName);
                     MainLoader.thisMap = thisMap;
                     IncidentDefOf.OrbitalTraderArrival.Worker.TryExecute(paramss);
                 }
