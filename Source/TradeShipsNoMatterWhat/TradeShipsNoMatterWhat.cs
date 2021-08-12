@@ -225,7 +225,10 @@ namespace TradeShipsNoMatterWhat
                     }
                     paramss.target = thisMap;
                     System.Random rnd = new System.Random();
-                    paramss.traderKind = listOfValidTraders[rnd.Next(0,listOfValidTraders.Count)];
+                    if (listOfValidTraders.Count > 0)
+                    {
+                        paramss.traderKind = listOfValidTraders[rnd.Next(0, listOfValidTraders.Count)];
+                    }
                     Log.Message("randomly selected trader kind = " + paramss.traderKind.defName);
                     MainLoader.thisMap = thisMap;
                     IncidentDefOf.OrbitalTraderArrival.Worker.TryExecute(paramss);
@@ -275,10 +278,6 @@ namespace TradeShipsNoMatterWhat
 
             Scribe_Values.Look(ref minDays, "minDays", 3);
             Scribe_Values.Look(ref maxDays, "maxDays", 7);
-            //Scribe_Collections.Look(ref exampleListOfPawns, "exampleListOfPawns", LookMode.Reference);
-
-            //MainLoader.staticUraniumTraders = forceUraniumTraders;
-            //MainLoader.ticksTillNextShip = rNum.Next(minDays * 60000, maxDays * 60000);
             base.ExposeData();
             MainLoader.staticMax = maxDays;
             MainLoader.staticMin = minDays;
@@ -333,12 +332,15 @@ namespace TradeShipsNoMatterWhat
             {
                 //first, see if anything has been loaded
                 List<string> previouslyDisabledTraders = new List<string>();
-                foreach (traderEntry trader in TradeShipsNoMatterWhatSettings.intermediateList)
+                //Log.Message("intermediate list size= " + TradeShipsNoMatterWhatSettings.intermediateList.Count);
+                if (TradeShipsNoMatterWhatSettings.intermediateList != null && TradeShipsNoMatterWhatSettings.intermediateList.Count != 0)
                 {
-                    if (!trader.enabled) previouslyDisabledTraders.Add(trader.defName);
+                    foreach (traderEntry trader in TradeShipsNoMatterWhatSettings.intermediateList)
+                    {
+                        if (!trader.enabled) previouslyDisabledTraders.Add(trader.defName);
+                    }
                 }
                 TradeShipsNoMatterWhatSettings.intermediateList = new List<traderEntry>();
-
                 //load the list while preserving any original settings
                 foreach (TraderKindDef traderDef in DefDatabase<TraderKindDef>.AllDefsListForReading)
                 {
@@ -349,15 +351,16 @@ namespace TradeShipsNoMatterWhat
                         {
                             status = false;
                         }
-                        TradeShipsNoMatterWhatSettings.intermediateList.Add(new traderEntry(traderDef.defName, status));
 
+                        TradeShipsNoMatterWhatSettings.intermediateList.Add(new traderEntry(traderDef.defName, status));
                     }
                 }
                 TradeShipsNoMatterWhatSettings.init = true;
                 Log.Message("[TradeShipsNoMatterWhat]Initialized loaded traders");
             }
 
-            //display the list of stuff
+            //display the list of enable-able traders
+            listingStandard.Label("Chose which traders to enable or disable");
             foreach (traderEntry trader in TradeShipsNoMatterWhatSettings.intermediateList)
             {
                 listingStandard.CheckboxLabeled(trader.defName, ref trader.enabled, "trader");
