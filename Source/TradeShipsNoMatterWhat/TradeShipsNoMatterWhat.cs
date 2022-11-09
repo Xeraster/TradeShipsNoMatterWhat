@@ -34,33 +34,6 @@ namespace TradeShipsNoMatterWhat
 
         }
 
-        public static void makeTradersHaveUranium()
-        {
-            Log.Message("passingSHips.Size = " + MainLoader.thisMap.passingShipManager.passingShips.Count.ToString());
-            TradeShip yeah = (TradeShip)MainLoader.thisMap.passingShipManager.passingShips[0];
-            Log.Message("trader kind = " + yeah.TraderKind.orbital);
-            //StockGenerator newStockVar = yeah.TraderKind.stockGenerators[0];
-            Log.Message("step 1");
-            StockGenerator_SingleDef newStockGen = new StockGenerator_SingleDef();
-            Log.Message("step 2");
-            newStockGen.countRange = IntRange.FromString("38~500");
-            Log.Message("step 3");
-            //ThingDefCountRangeClass newCount = new ThingDefCountRangeClass(ThingDefOf.Uranium, 38, 500);
-            //Log.Message("Step 2");
-            //yeah.TraderKind.stockGenerators.Add(StockGenerator_SingleDef)
-        }
-
-        public static void makeTraderHaveUranium(TradeShip theShip)
-        {
-            StockGenerator_SingleDef uranium = new StockGenerator_SingleDef();
-            uranium.countRange = IntRange.FromString("100~400");
-            uranium.HandlesThingDef(ThingDefOf.Uranium);
-            theShip.def.stockGenerators.AddItem(uranium);
-            theShip.GenerateThings();
-
-
-        }
-
     }
 
     //repurposing the drugEntry data type from my Animals Can Do Drugs mod
@@ -133,18 +106,18 @@ namespace TradeShipsNoMatterWhat
         {
             if (MainLoader.lastDocumentElementName == "savegame")
             {
-                Log.Message("attemtping to inject via FinalizeSaving()");
+                //Log.Message("attemtping to inject via FinalizeSaving()");
                 Scribe.saver.EnterNode("TSNMW");
                 Scribe.saver.WriteAttribute("ticksTillNextShip", MainLoader.ticksTillNextShip.ToString());
                 Scribe.saver.WriteAttribute("min", MainLoader.staticMin.ToString());
                 Scribe.saver.WriteAttribute("max", MainLoader.staticMax.ToString());
 
                 Scribe.saver.ExitNode();
-                Log.Message("done");
+                //Log.Message("done");
             }
             else
             {
-                Log.Message("open file is of type " + MainLoader.lastDocumentElementName + "and not a save game *.rws file");
+                //Log.Message("open file is of type " + MainLoader.lastDocumentElementName + "and not a save game *.rws file");
             }
 
         }
@@ -161,36 +134,40 @@ namespace TradeShipsNoMatterWhat
                 Log.Message("Attempting to load values from save file and inside xmlnode " + Scribe.loader.curXmlParent);
                 if (Scribe.loader.curXmlParent.Name == "game")
                 {
-                    Log.Message("Exiting the game xml node");
+                    //Log.Message("Exiting the game xml node");
                     Scribe.loader.ExitNode();
                 }
-                //Scribe.loader.EnterNode("savegame");
-                int tempMin = Convert.ToInt32(Scribe.loader.curXmlParent["TSNMW"].Attributes["min"].Value);
-                int tempMax = Convert.ToInt32(Scribe.loader.curXmlParent["TSNMW"].Attributes["max"].Value);
-                MainLoader.ticksTillNextShip = Convert.ToInt64(Scribe.loader.curXmlParent["TSNMW"].Attributes["ticksTillNextShip"].Value);
-                //XmlAttributeCollection attibs = Scribe.loader.curXmlParent.Attributes;
-                //Log.Message(attibs.Item(1).ToString());
-                //Log.Message(attibs.Item(2).ToString());
-                Scribe.loader.ExitNode();
-                //Log.Message(attibs["ticksTillNextShip"].Value);
-                Log.Message("value loading done");
-
-                if (tempMin != MainLoader.staticMin || tempMax != MainLoader.staticMax)
+                if (Scribe.loader.curXmlParent.Name == "savegame")
                 {
-                    //the value got changed while the save wasn't loaded
-                    Log.Message("Trade ships no matter what has had it's settings changed since last time this save was run. Regenerating timeTillNextShip");
-                    //regenerate random number
-                    System.Random rNum = new System.Random();
-                    MainLoader.ticksTillNextShip = rNum.Next(MainLoader.staticMin * 60000, MainLoader.staticMax * 60000);
-                    Log.Message("There will be " + MainLoader.ticksTillNextShip + " ticks until the next ship shows up");
+                    //Scribe.loader.EnterNode("savegame");
+                    int tempMin = Convert.ToInt32(Scribe.loader.curXmlParent["TSNMW"].Attributes["min"].Value);
+                    int tempMax = Convert.ToInt32(Scribe.loader.curXmlParent["TSNMW"].Attributes["max"].Value);
+                    MainLoader.ticksTillNextShip = Convert.ToInt64(Scribe.loader.curXmlParent["TSNMW"].Attributes["ticksTillNextShip"].Value);
+                    //XmlAttributeCollection attibs = Scribe.loader.curXmlParent.Attributes;
+                    //Log.Message(attibs.Item(1).ToString());
+                    //Log.Message(attibs.Item(2).ToString());
+                    //Scribe.loader.ExitNode();//don't do this taht can fuck things up
+                    //Log.Message(attibs["ticksTillNextShip"].Value);
+                    //Log.Message("value loading done");
+
+                    if (tempMin != MainLoader.staticMin || tempMax != MainLoader.staticMax)
+                    {
+                        //the value got changed while the save wasn't loaded
+                        Log.Message("Trade ships no matter what has had it's settings changed since last time this save was run. Regenerating timeTillNextShip");
+                        //regenerate random number
+                        System.Random rNum = new System.Random();
+                        MainLoader.ticksTillNextShip = rNum.Next(MainLoader.staticMin * 60000, MainLoader.staticMax * 60000);
+                        Log.Message("There will be " + MainLoader.ticksTillNextShip + " ticks until the next ship shows up");
+                    }
+                    Log.Message("ticksTillNextShip = " + MainLoader.ticksTillNextShip);
                 }
-                Log.Message("ticksTillNextShip = " + MainLoader.ticksTillNextShip);
 
 
             }
             catch (Exception e)
             {
-                Log.Message("Not loading a save game (exception caught)");
+                //get rid of log spam
+                //Log.Message("Not loading a save game (exception caught)");
             }
         }
     }

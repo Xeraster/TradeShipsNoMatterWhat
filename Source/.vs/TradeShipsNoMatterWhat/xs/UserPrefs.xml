@@ -1,14 +1,15 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workbench ActiveDocument="TradeShipsNoMatterWhat/TradeShipsNoMatterWhat.cs">
     <Files>
-      <File FileName="TradeShipsNoMatterWhat/TradeShipsNoMatterWhat.cs" Line="325" Column="81" />
+      <File FileName="TradeShipsNoMatterWhat/TradeShipsNoMatterWhat.cs" Line="167" Column="17" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State name="__root__">
           <Node name="TradeShipsNoMatterWhat" expanded="True">
-            <Node name="TradeShipsNoMatterWhat" expanded="True" selected="True">
+            <Node name="TradeShipsNoMatterWhat" expanded="True">
               <Node name="References" expanded="True" />
+              <Node name="TradeShipsNoMatterWhat.cs" selected="True" />
             </Node>
           </Node>
         </State>
